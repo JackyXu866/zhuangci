@@ -9,7 +9,7 @@
  * @param dayStr 中文时间中的日期信息
  * @param time tm结构体指针
  */
-void getDay(std::wstring &dayStr, std::tm *time)
+void getDay(std::wstring &dayStr, struct tm *time)
 {
     wchar_t prev = dayStr[0];
     switch (prev)
@@ -41,7 +41,7 @@ void getDay(std::wstring &dayStr, std::tm *time)
  * @param weekStr 中文时间中的星期信息
  * @param time tm结构体指针
  */
-void getWeek(std::wstring &weekStr, std::tm *time)
+void getWeek(std::wstring &weekStr, struct tm *time)
 {
     // match prefix
     std::wregex prefix(L"^(上|下|这)[\u4E00-\u9FA5A-Za-z0-9]*");
@@ -85,7 +85,7 @@ void getWeek(std::wstring &weekStr, std::tm *time)
  * @param dateStr 中文时间中的年月日信息
  * @param time tm结构体指针
  */
-void getDate(std::wstring &dateStr, std::tm *time)
+void getDate(std::wstring &dateStr, struct tm *time)
 {
     // 年
     int find = dateStr.find(L'年');

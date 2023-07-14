@@ -44,9 +44,9 @@ static std::wregex adjConfig(L"[0-1]\\s[0-2]\\s[0-9]+");
 // 地点
 static std::wregex location(L"(\u4e00-\u9fa5)+[旗|县|省|市|区]");
 
-void getDay(std::wstring &dayStr, std::tm *time);
-void getWeek(std::wstring &weekStr, std::tm *time);
-void getDate(std::wstring &dateStr, std::tm *time);
+void getDay(std::wstring &dayStr, struct tm *time);
+void getWeek(std::wstring &weekStr, struct tm *time);
+void getDate(std::wstring &dateStr, struct tm *time);
 
 std::wstring replaceChineseNum(std::wstring &sentence);
 int chineseNumToInt(std::wstring &num);

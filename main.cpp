@@ -127,12 +127,12 @@ void FilterDB(std::shared_ptr<Database> db)
 }
 
 // 获取用户输入的时间有关信息，并根据现在本地时间更新新时间
-std::tm *matchDate(std::wstring sentence)
+struct tm *matchDate(std::wstring sentence)
 {
     // get current tm
     time_t rawtime;
     time(&rawtime);
-    std::tm *timeinfo = localtime(&rawtime);
+    struct tm *timeinfo = localtime(&rawtime);
 
     // match date
     std::wsmatch match;
@@ -179,7 +179,7 @@ int matchKeyword(std::wstring sentence, std::shared_ptr<Keyword> k, std::shared_
         // 找出语句中出现的那个近义词
         description->word = k->getSimilarWord(which);
         // std::wcout << L"Matched keyword: " << k->getWord() << std::endl;
-        std::tm *t = matchDate(sentence);
+        struct tm *t = matchDate(sentence);
 
         // 更新tempKeywords，用于下一轮匹配 （多轮需求）
         db->tempKeywords = k->getNextKeywords();

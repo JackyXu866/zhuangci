@@ -2,15 +2,10 @@
 
 /**
  * @brief 关键词类，用于匹配句子中的关键词并执行相应的动作
- * 
+ *
  */
 #include "keyword.h"
 
-/**
- * @brief 构造函数，初始化关键词及相关属性
- * 
- * @param word 关键词
- */
 Keyword::Keyword(std::wstring word) : word(word)
 {
     similarWords = std::vector<std::wstring>();
@@ -29,26 +24,32 @@ Keyword::Keyword(std::wstring word) : word(word)
     repeat = 1;
 }
 
-/**
- * @brief 添加形容词
- * 
- * @param adjective 形容词
- */
+void Keyword::addSimilarWord(std::wstring similarWord)
+{
+    similarWords.push_back(similarWord);
+}
+
+void Keyword::setAction(std::function<int(std::shared_ptr<Description>)> action)
+{
+    this->action = action;
+}
+
 void Keyword::addAdjective(std::wstring adjective)
 {
     adjectiveList.push_back(adjective);
     maxAdjLen = std::max(maxAdjLen, adjective.length());
 }
 
-/**
- * @brief 根据关键词的位置，寻找形容词，具体寻找方式参考配置文件
- * 
- * @param sentence 句子
- * @param pos 关键词位置
- * @param description 存储详细信息
- * @return true 找到形容词
- * @return false 未找到形容词
- */
+void Keyword::addPrevKeyword(std::shared_ptr<Keyword> prevKeyword)
+{
+    prevKeywords.push_back(prevKeyword);
+}
+
+void Keyword::addNextKeyword(std::shared_ptr<Keyword> nextKeyword)
+{
+    nextKeywords.push_back(nextKeyword);
+}
+
 bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Description> description)
 {
     int begPos, adjLen;
@@ -99,12 +100,6 @@ bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Descripti
     return false;
 }
 
-/**
- * @brief 找到句子里的关键词，返回关键词的位置和关键词在similarWords里的位置
- * 
- * @param sentence 句子
- * @return std::pair<int, int> 如果找到，返回pair<位置, similar word(int)>，否则返回<-1, -1>
- */
 std::pair<int, int> Keyword::match(std::wstring &sentence)
 {
     std::wsmatch match;
@@ -124,12 +119,36 @@ std::pair<int, int> Keyword::match(std::wstring &sentence)
     return std::make_pair(-1, -1);
 }
 
-/**
- * @brief 执行动作，动作可以在外部定义并通过类的action指针传入
- * 
- * @param input 描述
- * @return int 返回值
- */
+std::wstring Keyword::getWord() const
+{
+    return word;
+}
+
+std::vector<std::wstring> Keyword::getSimilarWords() const
+{
+    return similarWords;
+}
+
+std::wstring Keyword::getSimilarWord(int index) const
+{
+    return similarWords[index];
+}
+
+std::vector<std::wstring> Keyword::getAdjectiveList() const
+{
+    return adjectiveList;
+}
+
+std::vector<std::shared_ptr<Keyword>> Keyword::getPrevKeywords() const
+{
+    return prevKeywords;
+}
+
+std::vector<std::shared_ptr<Keyword>> Keyword::getNextKeywords()
+{
+    return nextKeywords;
+}
+
 int Keyword::performAction(std::shared_ptr<Description> input) const
 {
     std::wcout << L"技能名称: " << word << std::endl;
