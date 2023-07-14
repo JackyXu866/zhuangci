@@ -135,17 +135,13 @@ struct tm *matchDate(std::wstring sentence)
     // match date
     std::wsmatch match;
     std::wstring tmp;
-    if (std::regex_search(sentence, match, day))
+    if (matchDay(sentence, timeinfo))
     {
-        tmp = match[0];
-        // std::wcout << L"Matched day: " << tmp << std::endl;
-        getDay(tmp, timeinfo);
+        // std::wcout << L"Matched day" << std::endl;
     }
-    else if (std::regex_search(sentence, match, week))
+    else if (matchWeek(sentence, timeinfo))
     {
-        tmp = match[0];
-        // std::wcout << L"Matched week: " << tmp << std::endl;
-        getWeek(tmp, timeinfo);
+        // std::wcout << L"Matched week" << std::endl;
     }
     else if (std::regex_search(sentence, match, date))
     {

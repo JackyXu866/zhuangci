@@ -34,9 +34,15 @@ static std::wregex cnDigit(L"[\u96f6\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u
 static std::wregex cnUnit(L"[\u5341\u767e\u5343\u4e07]");
 
 // 日期相关
-static std::wregex day(L"[今|明|昨|后|前]天");
+static std::wregex day(L"[今|明|昨|后|前][天|日]");
 static std::wregex week(L"(上|下|这)?(周|星期|礼拜)([1-6]|天|日)");
 static std::wregex date(L"((\\d{4})年)?((\\d{1,2})月)?(\\d{1,2})(日|号)");
+
+static std::unordered_map<wchar_t, int> dayTimeMap = {
+    {L'今', 0}, {L'明', 1}, {L'昨', -1}, {L'后', 2}, {L'前', -2}};
+static std::vector<std::wstring> dayVec = {L"天", L"日"};
+static std::vector<std::wstring> weekVec = {L"周", L"星期", L"礼拜"};
+
 
 // 配置相关
 static std::wregex adjConfig(L"[0-1]\\s[0-2]\\s[0-9]+");
@@ -51,8 +57,13 @@ void getDate(std::wstring &dateStr, struct tm *time);
 void replaceChineseNum(std::wstring &sentence);
 int chineseNumToInt(std::wstring &num);
 
+int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p);
+
+bool matchDay(std::wstring &sentence, struct tm *time);
+bool matchWeek(std::wstring& sentence, struct tm* time);
+
 // actions
-class Description;
+// class Description;
 // int weatherAction(std::shared_ptr<Description> description);
 
 #endif // UTIL_H

@@ -1,83 +1,6 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include "util.h"
 
-// 以下3个函数用于将中文时间转换为tm结构体
-
-/**
- * @brief 将中文时间中的日期信息转换为tm结构体中的日信息
- * 
- * @param dayStr 中文时间中的日期信息
- * @param time tm结构体指针
- */
-void getDay(std::wstring &dayStr, struct tm *time)
-{
-    wchar_t prev = dayStr[0];
-    switch (prev)
-    {
-    case L'今':
-        time->tm_mday = time->tm_mday;
-        break;
-    case L'明':
-        time->tm_mday = time->tm_mday + 1;
-        break;
-    case L'昨':
-        time->tm_mday = time->tm_mday - 1;
-        break;
-    case L'后':
-        time->tm_mday = time->tm_mday + 2;
-        break;
-    case L'前':
-        time->tm_mday = time->tm_mday - 2;
-        break;
-
-    default:
-        break;
-    }
-}
-
-/**
- * @brief 将中文时间中的星期信息转换为tm结构体中的日信息
- * 
- * @param weekStr 中文时间中的星期信息
- * @param time tm结构体指针
- */
-void getWeek(std::wstring &weekStr, struct tm *time)
-{
-    // match prefix
-    std::wregex prefix(L"^(上|下|这)[\u4E00-\u9FA5A-Za-z0-9]*");
-    if (std::regex_match(weekStr, prefix))
-    {
-        wchar_t prev = weekStr[0];
-        switch (prev)
-        {
-        case L'上':
-            time->tm_mday -= 7;
-            break;
-        case L'下':
-            time->tm_mday += 7;
-            break;
-        case L'这':
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    // match actual day
-    wchar_t last = weekStr[weekStr.size() - 1];
-    int day = 0;
-    if (last == L'天' || last == L'日')
-    {
-        day = 0;
-    }
-    else
-    {
-        day = last - L'0';
-    }
-    int diff = day - time->tm_wday;
-    time->tm_mday += diff;
-}
 
 /**
  * @brief 将中文时间中的年月日信息转换为tm结构体中的年月日信息
@@ -208,6 +131,91 @@ int chineseNumToInt(std::wstring &num)
     }
 
     return rt;
+}
+
+int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p){
+    int pos = -1;
+    for(std::wstring& d : vec){
+        pos = std::max((int)sentence.find(d, p), pos);
+        if(pos != std::wstring::npos){
+            break;
+        }
+    }
+    return pos;
+}
+
+// pattern match day without regex
+bool matchDay(std::wstring& sentence, struct tm* time){
+    int p = 0;  // 当前位置，循环直到找到所有的时间词或者找不到为止
+    // 先找定位词 天/日
+    while(p < sentence.size()){
+        int pos = locateKey(sentence, dayVec, p);
+        if(pos == std::wstring::npos || pos == 0){
+            break;
+        }
+
+        // 找表达时间词
+        for(std::pair<wchar_t, int> p : dayTimeMap){
+            if(sentence.find(p.first) != std::wstring::npos){
+                time->tm_mday += p.second;
+                return true;
+            }
+        }
+
+        p = pos + 1;
+    }
+    return false;
+}
+
+// pattern match week without regex
+bool matchWeek(std::wstring& sentence, struct tm* time){
+    int p = 0;  // 当前位置，循环直到找到所有的时间词或者找不到为止
+    // 先找定位词 周
+    while(p < sentence.size()){
+        int pos = locateKey(sentence, weekVec, p);
+        if(pos == std::wstring::npos || pos == sentence.size()-1){
+            break;
+        }
+
+        // 先找表达时间词
+        wchar_t last = sentence[pos+1];
+        int day = 0;
+        if (last == L'天' || last == L'日')
+        {
+            day = 0;
+        }
+        else
+        {
+            day = last - L'0';
+            // 错误的时间词
+            if(day < 1 || day > 7){
+                p = pos + 1;
+                continue;
+            }
+        }
+        int diff = day - time->tm_wday;
+        time->tm_mday += diff;
+
+        // 看看有没有前置词
+        wchar_t pre = sentence[pos - 1];
+        switch (pre)
+        {
+        case L'上':
+            time->tm_mday -= 7;
+            break;
+        case L'下':
+            time->tm_mday += 7;
+            break;
+        case L'这':
+            break;
+        default:
+            break;
+        }
+
+        return true;
+    }
+    return false;
+
 }
 
 
