@@ -127,7 +127,7 @@ void getDate(std::wstring &dateStr, struct tm *time)
  * @param sentence 待替换的句子
  * @return std::wstring 替换后的句子
  */
-std::wstring replaceChineseNum(std::wstring &sentence)
+void replaceChineseNum(std::wstring &sentence)
 {
     std::wsmatch match;
     std::wstring::const_iterator iterStart = sentence.begin();
@@ -150,8 +150,6 @@ std::wstring replaceChineseNum(std::wstring &sentence)
     }
 
     // std::wcout << "sentence: " << sentence << std::endl;
-
-    return sentence;
 }
 
 /**
@@ -213,30 +211,30 @@ int chineseNumToInt(std::wstring &num)
 }
 
 
-/**
- * @brief 使用高德地图API获取天气信息
- * 
- * @param description 描述信息
- * @return int 返回1表示成功
- */
-int weatherAction(std::shared_ptr<Description> description)
-{
-    std::string key = "071ba2a731fad6093c444925d44a82d5";
-    std::string url = "http://restapi.amap.com/v3/weather/weatherInfo?";
-    std::string city = "110101";
-    std::string extensions = "base";
+// /**
+//  * @brief 使用高德地图API获取天气信息
+//  * 
+//  * @param description 描述信息
+//  * @return int 返回1表示成功
+//  */
+// int weatherAction(std::shared_ptr<Description> description)
+// {
+//     std::string key = "071ba2a731fad6093c444925d44a82d5";
+//     std::string url = "http://restapi.amap.com/v3/weather/weatherInfo?";
+//     std::string city = "110101";
+//     std::string extensions = "base";
 
-    http::Request request(url + "key=" + key + "&city=" + city + "&extensions=" + extensions);
-    const http::Response response = request.send("GET");
-    std::string beforeW = std::string(response.body.begin(), response.body.end());
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring res = converter.from_bytes(beforeW);
+//     http::Request request(url + "key=" + key + "&city=" + city + "&extensions=" + extensions);
+//     const http::Response response = request.send("GET");
+//     std::string beforeW = std::string(response.body.begin(), response.body.end());
+//     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+//     std::wstring res = converter.from_bytes(beforeW);
 
-    std::wcout << res << std::endl
-               << std::endl;
+//     std::wcout << res << std::endl
+//                << std::endl;
 
-    return 1;
-}
+//     return 1;
+// }
 
 
 // int main(){

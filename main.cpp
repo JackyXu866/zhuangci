@@ -26,7 +26,7 @@ std::shared_ptr<Database> readConfig(char *config)
     std::shared_ptr<Keyword> keyword = nullptr;
 
     int type = 0; // 0: key, 1: adj, 2: prev, 3: similarWord
-    while (std::getline(file, line, L'\n'))
+    while (std::getline(file, line))
     {
         // match type
         if (line == L"key:")
@@ -47,7 +47,7 @@ std::shared_ptr<Database> readConfig(char *config)
         }
         else
         { // information
-            line = replaceChineseNum(line);
+            replaceChineseNum(line);
             if (type == 0)
             {
                 if (db->keywords.find(line) != db->keywords.end())
@@ -59,10 +59,6 @@ std::shared_ptr<Database> readConfig(char *config)
                 {
                     keyword = std::shared_ptr<Keyword>(new Keyword(line));
                     db->keywords[line] = keyword;
-                    if (line == L"天气")
-                    {
-                        keyword->setAction(&weatherAction);
-                    }
                 }
                 type = 3;
                 // std::wcout << "Begin: " << line << std::endl;
@@ -104,6 +100,7 @@ std::shared_ptr<Database> readConfig(char *config)
                 // std::wcout << "Key: " << line << std::endl;
             }
         }
+        line.clear();
     }
 
     file.close();
@@ -190,7 +187,10 @@ int matchKeyword(std::wstring sentence, std::shared_ptr<Keyword> k, std::shared_
         description->time = t;
         // std::wcout << std::asctime(description->time) << std::endl;
 
-        k->performAction(description);
+        wchar_t* r = (k->performAction(description));
+        std::wcout << r << std::endl;
+        
+        delete[] r;
 
         return 1;
     }
@@ -219,6 +219,9 @@ int matchKeywords(std::wstring sentence, std::shared_ptr<Database> db)
 }
 
 // argv[1] is the path to the config file
+#include <iostream>
+#include <limits>
+
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -234,17 +237,20 @@ int main(int argc, char *argv[])
     std::shared_ptr<Database> db = readConfig(argv[1]);
     FilterDB(db);
 
-    std::wstring input;
+    std::wstring input = L"";
+    std::wstring exit = L"exit";
     // std::wcout.imbue(std::locale("", LC_CTYPE));
     std::wcin.imbue(std::locale(""));
     while (true)
     {
         std::wcout << L"请输入：";
-        std::wcin >> input;
-        if (input == L"exit")
+        if(!(std::wcin >> input) || input == L"") continue;
+        if (input == exit)
             break;
-        input = replaceChineseNum(input);
+        replaceChineseNum(input);
         matchKeywords(input, db);
+
+        input.clear();
     }
 
     setlocale(LC_ALL, "C");

@@ -48,11 +48,11 @@ void getDay(std::wstring &dayStr, struct tm *time);
 void getWeek(std::wstring &weekStr, struct tm *time);
 void getDate(std::wstring &dateStr, struct tm *time);
 
-std::wstring replaceChineseNum(std::wstring &sentence);
+void replaceChineseNum(std::wstring &sentence);
 int chineseNumToInt(std::wstring &num);
 
 // actions
 class Description;
-int weatherAction(std::shared_ptr<Description> description);
+// int weatherAction(std::shared_ptr<Description> description);
 
 #endif // UTIL_H

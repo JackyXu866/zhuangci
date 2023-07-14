@@ -44,7 +44,7 @@ public:
 
     // 修改器 (Modifiers)
     void addSimilarWord(std::wstring similarWord);
-    void setAction(std::function<int(std::shared_ptr<Description>)> action);
+    // void setAction(std::function<int(std::shared_ptr<Description>)> action);
     void addAdjective(std::wstring adjective);
     void addPrevKeyword(std::shared_ptr<Keyword> prevKeyword);
     void addNextKeyword(std::shared_ptr<Keyword> nextKeyword);
@@ -80,9 +80,9 @@ public:
      * @brief 执行动作，动作可以在外部定义并通过类的action指针传入
      *
      * @param input 描述
-     * @return int 返回值
+     * @return wchar_t* JSON格式的返回值
      */
-    int performAction(std::shared_ptr<Description> input) const;
+    wchar_t* performAction(std::shared_ptr<Description> input) const;
 
     int ADJ_GAP_SPACE; // 形容词与关键词之间的最大间隔
     // 形容词搜索方式，0为从关键词位置开始向前搜索，1为向后搜索，2为双向搜索
@@ -94,7 +94,7 @@ private:
     std::vector<std::wstring> similarWords;                  // 与关键词相似的词（含关键词本身）
     std::vector<std::wstring> adjectiveList;                 // 形容词列表
     size_t maxAdjLen;                                        // 形容词最大长度
-    std::function<int(std::shared_ptr<Description>)> action; // action to be performed when keyword is detected, takes in adjective
+    // std::function<int(std::shared_ptr<Description>)> action; // action to be performed when keyword is detected, takes in adjective
 
     // 多轮
     // 匹配逻辑：在从数据库读取时获取每个关键词前置及后置关键词

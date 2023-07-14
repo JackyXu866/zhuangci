@@ -12,7 +12,7 @@ Keyword::Keyword(std::wstring word) : word(word)
     similarWords.push_back(word);
     adjectiveList = std::vector<std::wstring>();
     maxAdjLen = 0;
-    action = nullptr;
+    // action = nullptr;
     ADJ_SEARCH_TYPE = 0;
     ADJ_GAP_SPACE = 3;
 
@@ -29,10 +29,10 @@ void Keyword::addSimilarWord(std::wstring similarWord)
     similarWords.push_back(similarWord);
 }
 
-void Keyword::setAction(std::function<int(std::shared_ptr<Description>)> action)
-{
-    this->action = action;
-}
+// void Keyword::setAction(std::function<int(std::shared_ptr<Description>)> action)
+// {
+//     this->action = action;
+// }
 
 void Keyword::addAdjective(std::wstring adjective)
 {
@@ -149,21 +149,33 @@ std::vector<std::shared_ptr<Keyword>> Keyword::getNextKeywords()
     return nextKeywords;
 }
 
-int Keyword::performAction(std::shared_ptr<Description> input) const
+wchar_t *Keyword::performAction(std::shared_ptr<Description> input) const
 {
-    std::wcout << L"技能名称: " << word << std::endl;
-    std::wcout << L"具体词语: " << input->word << std::endl;
-    std::wcout << L"技能时间: " << std::asctime(input->time);
-    if (input->adjective != L"")
-        std::wcout << L"技能形容/类别: " << input->adjective << std::endl;
-    else
-        std::wcout << L"技能形容/类别: " << L"无" << std::endl;
-    if (head != true)
-        std::wcout << L"经过前置判定" << std::endl;
-    std::wcout << std::endl;
+    // std::wcout << L"技能名称: " << word << std::endl;
+    // std::wcout << L"具体词语: " << input->word << std::endl;
+    // std::wcout << L"技能时间: " << std::asctime(input->time);
+    // if (input->adjective != L"")
+    //     std::wcout << L"技能形容/类别: " << input->adjective << std::endl;
+    // else
+    //     std::wcout << L"技能形容/类别: " << L"无" << std::endl;
+    // if (head != true)
+    //     std::wcout << L"经过前置判定" << std::endl;
+    // std::wcout << std::endl;
 
-    if (action != nullptr)
-        action(input);
+    // if (action != nullptr)
+    //     action(input);
 
-    return 0;
+    // 构建JSON格式的返回参数
+    std::wstring result;
+    result += L"{";
+    result += L"\"技能名称\":\"" + word + L"\",";
+    result += L"\"具体词语\":\"" + input->word + L"\",";
+    result += L"\"技能时间\":\"" + std::to_wstring(input->time->tm_year + 1900) + L"/" + std::to_wstring(input->time->tm_mon + 1) + L"/" + std::to_wstring(input->time->tm_mday) + L"\",";
+    result += L"\"技能形容\":\"" + input->adjective + L"\"";
+    result += L"}\n";
+
+    wchar_t *rt = new wchar_t[result.length() + 1];
+    wcscpy(rt, result.c_str());
+
+    return rt;
 }

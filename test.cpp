@@ -7,7 +7,7 @@
 #include <codecvt>
 
 int main(){
-    // std::locale::global(std::locale("zh_CN.UTF-8"));
+    std::locale::global(std::locale("zh_CN.UTF-8"));
     // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
     // std::basic_string<wchar_t> str = L"你好";
@@ -20,9 +20,13 @@ int main(){
     // std::wstring str3(p2);
     // std::wcout << str3 << std::endl;
 
-    std::string a = "aabb你好";
-    std::cout << a.substr(0, 3) << std::endl;
-    std::cout << a.substr(4, 3) << std::endl;
+    std::wstring in;
+    std::wcin >> in;
+
+    std::wstring json = L"{";
+    json += L"\"name\": \"张三\",";
+    wchar_t *p(json.data());
+    std::wcout << json << std::endl;
 
     return 0;
 }
