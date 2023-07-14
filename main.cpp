@@ -113,8 +113,9 @@ void FilterDB(std::shared_ptr<Database> db)
     db->headKeywords = std::vector<std::shared_ptr<Keyword>>();
     // db->tempKeywords = std::vector<std::shared_ptr<Keyword>>();
 
-    for (auto &[_, k] : db->keywords)
+    for (std::pair<std::wstring, std::shared_ptr<Keyword>> p : db->keywords)
     {
+        std::shared_ptr<Keyword> k = p.second;
         if (k->head)
         {
             db->headKeywords.push_back(k);
