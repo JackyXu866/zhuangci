@@ -3,48 +3,6 @@
 
 
 /**
- * @brief 将中文时间中的年月日信息转换为tm结构体中的年月日信息
- * 
- * @param dateStr 中文时间中的年月日信息
- * @param time tm结构体指针
- */
-void getDate(std::wstring &dateStr, struct tm *time)
-{
-    // 年
-    int find = dateStr.find(L'年');
-    int tmp = 0;
-    if ((size_t)find != std::wstring::npos)
-    {
-        std::wstring yearStr = dateStr.substr(0, find);
-        tmp = std::stoi(yearStr);
-        if (tmp < 1900)
-            return;
-        time->tm_year = tmp - 1900;
-        dateStr = dateStr.substr(find + 1);
-    }
-
-    // 月
-    find = dateStr.find(L'月');
-    if ((size_t)find != std::wstring::npos)
-    {
-        std::wstring monthStr = dateStr.substr(0, find);
-        tmp = std::stoi(monthStr);
-        if (tmp < 1 || tmp > 12)
-            return;
-        time->tm_mon = tmp - 1;
-        dateStr = dateStr.substr(find + 1);
-    }
-
-    // 日
-    std::wstring dayStr = dateStr.substr(0, dateStr.size() - 1);
-    tmp = std::stoi(dayStr);
-    if (tmp < 1 || tmp > 31)
-        return;
-    time->tm_mday = tmp;
-}
-
-
-/**
  * @brief 将中文数字替换为阿拉伯数字
  * 
  * @param sentence 待替换的句子
@@ -63,7 +21,6 @@ void replaceChineseNum(std::wstring &sentence)
         index += match.position(0);
         // std::wcout << temp << " at " << index << " with size "
         // << temp.size() << std::endl;
-        // index += temp.size();
         iterStart = match[0].second;
 
         std::wstring numStr = std::to_wstring(chineseNumToInt(temp));
@@ -144,6 +101,33 @@ int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p){
     return pos;
 }
 
+// @brief 从句子中提取不确定位数的数字
+// @param sizeMax: 最大位数
+// @param sentence: 句子
+// @param pos: 根部（个位）位置
+// @return int: 数字，-1表示没找到
+int unsureInt(int sizeMax, std::wstring& sentence, int pos){
+    if(pos < 0 || pos >= sentence.size()) return -1;
+
+    int rt = 0;
+    int size = 0;
+
+    while(size < sizeMax){
+        int p = pos-size;
+        if(p < 0) break;
+        wchar_t c = sentence[pos - size];
+        if(c >= L'0' && c <= L'9'){
+            rt += ((c - L'0') * std::pow(10, size));
+        }
+        // 没找到数字
+        else if(size == 0) return -1;
+        else break;
+
+        size++;
+    }
+    return rt;
+}
+
 // pattern match day without regex
 bool matchDay(std::wstring& sentence, struct tm* time){
     int p = 0;  // 当前位置，循环直到找到所有的时间词或者找不到为止
@@ -218,42 +202,64 @@ bool matchWeek(std::wstring& sentence, struct tm* time){
 
 }
 
+// xxxx年xx月xx日，只要找到日就行
+bool matchDate(std::wstring& sentence, struct tm* time){
+    int p = 0;
+    // 先找 最小时间单位(天数)
+    while(p < sentence.size()){
+        int posDay = locateKey(sentence, dateVec, p);
+        if(posDay == std::wstring::npos || posDay == 0){
+            break;
+        }
 
-// /**
-//  * @brief 使用高德地图API获取天气信息
-//  * 
-//  * @param description 描述信息
-//  * @return int 返回1表示成功
-//  */
-// int weatherAction(std::shared_ptr<Description> description)
-// {
-//     std::string key = "071ba2a731fad6093c444925d44a82d5";
-//     std::string url = "http://restapi.amap.com/v3/weather/weatherInfo?";
-//     std::string city = "110101";
-//     std::string extensions = "base";
+        // 确定天数
+        int mday = unsureInt(2, sentence, posDay-1);
 
-//     http::Request request(url + "key=" + key + "&city=" + city + "&extensions=" + extensions);
-//     const http::Response response = request.send("GET");
-//     std::string beforeW = std::string(response.body.begin(), response.body.end());
-//     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-//     std::wstring res = converter.from_bytes(beforeW);
+        // 验证天数
+        if(mday < 1 || mday > 31){
+            p = posDay + 1;
+            continue;
+        }
+        time->tm_mday = mday;
+        /*********************************************/
 
-//     std::wcout << res << std::endl
-//                << std::endl;
+        // 确定月份
+        int posMonth = posDay;
+        if(mday >= 10) posMonth -= 3;
+        else posMonth -= 2;
 
-//     return 1;
-// }
+        if(posMonth < 0) return true;
+        if(sentence[posMonth] != L'月'){
+            return true;
+        }
 
+        int month = unsureInt(2, sentence, posMonth-1);
+        if(month < 1 || month > 12){
+            return true;
+        }
+        time->tm_mon = month - 1;
+        /*********************************************/
 
-// int main(){
-//     setlocale(LC_ALL, "zh_CN.UTF-8");
-//     std::wstring test = L"我要买一百个苹果，三个橘子，五个梨子，还有一千个香蕉。abcabc";
-//     // set locale otherwise chinese character will not be printed
-//     std::wcout << replaceChineseNum(test) << std::endl;
-//     std::wcout << "aaabbbccc" << std::endl;
+        // 确定年份
+        int posYear = posMonth;
+        if(month >= 10) posYear -= 3;
+        else posYear -= 2;
 
-//     // std::wstring test = L"八万零十";
-//     // std::wcout << chineseNumToInt(test) << std::endl;
+        if(posYear < 0) return true;
+        if(sentence[posYear] != L'年'){
+            return true;
+        }
 
-//     return 0;
-// }
+        int year = unsureInt(4, sentence, posYear-1);
+        if(year < 0) return true;
+        // 支持两位数年份
+        if(year < 40) year += 2000;
+        else if(year < 100) year += 1900;
+        else if(year < 1900) return true;
+        time->tm_year = year - 1900;
+
+        return true;
+    }
+
+    return false;
+}

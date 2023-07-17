@@ -133,8 +133,6 @@ struct tm *matchDate(std::wstring sentence)
     struct tm *timeinfo = localtime(&rawtime);
 
     // match date
-    std::wsmatch match;
-    std::wstring tmp;
     if (matchDay(sentence, timeinfo))
     {
         // std::wcout << L"Matched day" << std::endl;
@@ -143,11 +141,9 @@ struct tm *matchDate(std::wstring sentence)
     {
         // std::wcout << L"Matched week" << std::endl;
     }
-    else if (std::regex_search(sentence, match, date))
+    else if (matchDate(sentence, timeinfo))
     {
-        tmp = match[0];
-        // std::wcout << L"Matched date: " << tmp << std::endl;
-        getDate(tmp, timeinfo);
+        // std::wcout << L"Matched date" << std::endl;
     }
 
     return timeinfo;
@@ -215,10 +211,8 @@ int matchKeywords(std::wstring sentence, std::shared_ptr<Database> db)
     return 0;
 }
 
+// 因含中文数据，需要转换编码并使用wstring（2字节）存储，与C#的string（2字节）相同
 // argv[1] is the path to the config file
-#include <iostream>
-#include <limits>
-
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -237,6 +231,8 @@ int main(int argc, char *argv[])
     std::wstring input = L"";
     std::wstring exit = L"exit";
     // std::wcout.imbue(std::locale("", LC_CTYPE));
+
+    // 把输入流的编码转换成本地编码，不然windows下会乱码
     std::wcin.imbue(std::locale(""));
     while (true)
     {

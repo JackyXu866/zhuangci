@@ -8,6 +8,7 @@
 #include <locale>
 #include <codecvt>
 #include <memory>
+#include <cmath>
 
 #include "include/HTTPRequest.hpp"
 
@@ -33,15 +34,19 @@ static std::wregex nonValid(L"[^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u
 static std::wregex cnDigit(L"[\u96f6\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d]");
 static std::wregex cnUnit(L"[\u5341\u767e\u5343\u4e07]");
 
-// 日期相关
-static std::wregex day(L"[今|明|昨|后|前][天|日]");
-static std::wregex week(L"(上|下|这)?(周|星期|礼拜)([1-6]|天|日)");
-static std::wregex date(L"((\\d{4})年)?((\\d{1,2})月)?(\\d{1,2})(日|号)");
+static std::vector<wchar_t> cnNum = {
+    L'零', L'一', L'二', L'三', L'四',
+    L'五', L'六', L'七', L'八', L'九'};
+static std::vector<wchar_t> cnNumAll = {
+    L'零', L'一', L'二', L'三', L'四',
+    L'五', L'六', L'七', L'八', L'九', L'十', L'百', L'千', L'万'};
 
+// 日期相关
 static std::unordered_map<wchar_t, int> dayTimeMap = {
     {L'今', 0}, {L'明', 1}, {L'昨', -1}, {L'后', 2}, {L'前', -2}};
 static std::vector<std::wstring> dayVec = {L"天", L"日"};
 static std::vector<std::wstring> weekVec = {L"周", L"星期", L"礼拜"};
+static std::vector<std::wstring> dateVec = {L"日", L"号"};
 
 
 // 配置相关
@@ -50,17 +55,15 @@ static std::wregex adjConfig(L"[0-1]\\s[0-2]\\s[0-9]+");
 // 地点
 static std::wregex location(L"(\u4e00-\u9fa5)+[旗|县|省|市|区]");
 
-void getDay(std::wstring &dayStr, struct tm *time);
-void getWeek(std::wstring &weekStr, struct tm *time);
-void getDate(std::wstring &dateStr, struct tm *time);
-
 void replaceChineseNum(std::wstring &sentence);
 int chineseNumToInt(std::wstring &num);
 
 int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p);
+int unsureInt(int sizeMax, std::wstring& sentence, int pos);
 
 bool matchDay(std::wstring &sentence, struct tm *time);
 bool matchWeek(std::wstring& sentence, struct tm* time);
+bool matchDate(std::wstring& sentence, struct tm* time);
 
 // actions
 // class Description;

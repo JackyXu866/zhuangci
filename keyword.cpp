@@ -151,20 +151,6 @@ std::vector<std::shared_ptr<Keyword>> Keyword::getNextKeywords()
 
 wchar_t *Keyword::performAction(std::shared_ptr<Description> input) const
 {
-    // std::wcout << L"技能名称: " << word << std::endl;
-    // std::wcout << L"具体词语: " << input->word << std::endl;
-    // std::wcout << L"技能时间: " << std::asctime(input->time);
-    // if (input->adjective != L"")
-    //     std::wcout << L"技能形容/类别: " << input->adjective << std::endl;
-    // else
-    //     std::wcout << L"技能形容/类别: " << L"无" << std::endl;
-    // if (head != true)
-    //     std::wcout << L"经过前置判定" << std::endl;
-    // std::wcout << std::endl;
-
-    // if (action != nullptr)
-    //     action(input);
-
     // 构建JSON格式的返回参数
     std::wstring result;
     result += L"{";
