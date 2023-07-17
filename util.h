@@ -8,9 +8,11 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <codecvt>
 
 #include "keyword.h"
 #include "database.h"
+#include "httplib.h"
 
 // 数字相关
 static std::unordered_map<wchar_t, int> chineseUnit = {

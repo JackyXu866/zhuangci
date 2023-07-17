@@ -140,7 +140,7 @@ std::pair<int, int> Keyword::match(std::wstring &sentence)
     return std::make_pair(-1, -1);
 }
 
-wchar_t *Keyword::performAction(std::shared_ptr<Description> input) const
+std::wstring Keyword::performAction(std::shared_ptr<Description> input) const
 {
     // 构建JSON格式的返回参数
     std::wstring result;
@@ -151,8 +151,5 @@ wchar_t *Keyword::performAction(std::shared_ptr<Description> input) const
     result += L"\"技能形容\":\"" + input->adjective + L"\"";
     result += L"}\n";
 
-    wchar_t *rt = new wchar_t[result.length() + 1];
-    wcscpy(rt, result.c_str());
-
-    return rt;
+    return result;
 }

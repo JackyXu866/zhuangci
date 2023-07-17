@@ -1,6 +1,7 @@
 
 
 #define _CRT_SECURE_NO_WARNINGS
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #ifndef MAIN_CPP
 #define MAIN_CPP
 
@@ -169,10 +170,10 @@ int matchKeyword(std::wstring sentence, std::shared_ptr<Keyword> k, std::shared_
         std::mktime(t);
         description->time = t;
 
-        wchar_t *r = (k->performAction(description));
+        std::wstring r = (k->performAction(description));
         std::wcout << r << std::endl;
 
-        delete[] r;
+        db->json_return = r;
 
         return 1;
     }
@@ -196,7 +197,7 @@ int matchKeywords(std::wstring sentence, std::shared_ptr<Database> db)
 
     // clear tempKeywords
     db->tempKeywords = std::vector<std::shared_ptr<Keyword>>();
-    std::wcout << L"未匹配" << std::endl;
+    db->json_return = L"{}";
     return 0;
 }
 
@@ -222,20 +223,33 @@ int main(int argc, char *argv[])
 
     // 把输入流的编码转换成本地编码，不然windows下会乱码
     std::wcin.imbue(std::locale(""));
-    while (true)
-    {
-        std::wcout << L"请输入：";
-        if (!(std::wcin >> input) || input == L"")
-            continue;
-        if (input == exit)
-            break;
-        replaceChineseNum(input);
-        matchKeywords(input, db);
 
-        input.clear();
-    }
+    // 构建http服务器
+    httplib::Server svr;
+    std::wcout << L"服务器已启动" << std::endl;
 
+    // http post 请求，接收用户输入 (localhost:8080/input)-> body: 内容
+    svr.Post("/input", [&](const httplib::Request &req, httplib::Response &res) {
+        std::string input = req.body;
+        std::wstring winput = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(input);
+        std::wcout << L"收到请求：" << winput << std::endl;
+
+        // 退出
+        if (winput == exit)
+        {
+            std::wcout << L"停止服务器" << std::endl;
+            svr.stop();
+        }
+
+        replaceChineseNum(winput);
+        matchKeywords(winput, db);
+        std::string output = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(db->json_return);
+        res.set_content(output, "application/json");
+    });
+
+    svr.listen("0.0.0.0", 8080);
     setlocale(LC_ALL, "C");
+
     return 0;
 }
 

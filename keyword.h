@@ -74,12 +74,12 @@ public:
      */
     std::pair<int, int> match(std::wstring &sentence);
     /**
-     * @brief 执行动作，动作可以在外部定义并通过类的action指针传入
+     * @brief 总结为json
      *
      * @param input 描述
      * @return wchar_t* JSON格式的返回值
      */
-    wchar_t *performAction(std::shared_ptr<Description> input) const;
+    std::wstring performAction(std::shared_ptr<Description> input) const;
 
     int ADJ_GAP_SPACE; // 形容词与关键词之间的最大间隔
     // 形容词搜索方式，0为从关键词位置开始向前搜索，1为向后搜索，2为双向搜索
