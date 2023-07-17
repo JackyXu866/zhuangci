@@ -65,12 +65,13 @@ std::shared_ptr<Database> readConfig(char *config)
             }
             else if (type == 1)
             {
-                if (std::regex_match(line, adjConfig))
+                // adj 配置: s:1 1 2（必须形容词 搜索方式 间隔）
+                if (line.substr(0, 2) == L"s:")
                 {
-                    int tmp = line[0] - L'0';
+                    int tmp = line[2] - L'0';
                     keyword->mustAdj = (tmp == 1);
-                    keyword->ADJ_SEARCH_TYPE = line[2] - L'0';
-                    keyword->ADJ_GAP_SPACE = std::stoi(line.substr(4));
+                    keyword->ADJ_SEARCH_TYPE = line[4] - L'0';
+                    keyword->ADJ_GAP_SPACE = std::stoi(line.substr(6));
 
                     // std::wcout << L"ADJ_SEARCH_TYPE: " << keyword->ADJ_SEARCH_TYPE << std::endl;
                     // std::wcout << L"ADJ_GAP_SPACE: " << keyword->ADJ_GAP_SPACE << std::endl;

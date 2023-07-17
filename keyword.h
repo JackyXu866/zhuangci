@@ -44,10 +44,18 @@ public:
 
     // 修改器 (Modifiers)
     void addSimilarWord(std::wstring similarWord);
-    // void setAction(std::function<int(std::shared_ptr<Description>)> action);
     void addAdjective(std::wstring adjective);
     void addPrevKeyword(std::shared_ptr<Keyword> prevKeyword);
     void addNextKeyword(std::shared_ptr<Keyword> nextKeyword);
+
+
+    // 访问器 (Accessors)
+    std::wstring getWord() const;
+    std::vector<std::wstring> getSimilarWords() const;
+    std::wstring getSimilarWord(int index) const;
+    std::vector<std::wstring> getAdjectiveList() const;
+    std::vector<std::shared_ptr<Keyword>> getPrevKeywords() const;
+    std::vector<std::shared_ptr<Keyword>> getNextKeywords();
 
     /**
      * @brief 根据关键词的位置，寻找形容词，具体寻找方式参考配置文件
@@ -67,15 +75,6 @@ public:
      * @return std::pair<int, int> 如果找到，返回pair<位置, similar word(int)>，否则返回<-1, -1>
      */
     std::pair<int, int> match(std::wstring &sentence);
-
-    // 访问器 (Accessors)
-    std::wstring getWord() const;
-    std::vector<std::wstring> getSimilarWords() const;
-    std::wstring getSimilarWord(int index) const;
-    std::vector<std::wstring> getAdjectiveList() const;
-    std::vector<std::shared_ptr<Keyword>> getPrevKeywords() const;
-    std::vector<std::shared_ptr<Keyword>> getNextKeywords();
-
     /**
      * @brief 执行动作，动作可以在外部定义并通过类的action指针传入
      *

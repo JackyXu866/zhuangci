@@ -29,11 +29,6 @@ void Keyword::addSimilarWord(std::wstring similarWord)
     similarWords.push_back(similarWord);
 }
 
-// void Keyword::setAction(std::function<int(std::shared_ptr<Description>)> action)
-// {
-//     this->action = action;
-// }
-
 void Keyword::addAdjective(std::wstring adjective)
 {
     adjectiveList.push_back(adjective);
@@ -48,6 +43,36 @@ void Keyword::addPrevKeyword(std::shared_ptr<Keyword> prevKeyword)
 void Keyword::addNextKeyword(std::shared_ptr<Keyword> nextKeyword)
 {
     nextKeywords.push_back(nextKeyword);
+}
+
+std::wstring Keyword::getWord() const
+{
+    return word;
+}
+
+std::vector<std::wstring> Keyword::getSimilarWords() const
+{
+    return similarWords;
+}
+
+std::wstring Keyword::getSimilarWord(int index) const
+{
+    return similarWords[index];
+}
+
+std::vector<std::wstring> Keyword::getAdjectiveList() const
+{
+    return adjectiveList;
+}
+
+std::vector<std::shared_ptr<Keyword>> Keyword::getPrevKeywords() const
+{
+    return prevKeywords;
+}
+
+std::vector<std::shared_ptr<Keyword>> Keyword::getNextKeywords()
+{
+    return nextKeywords;
 }
 
 bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Description> description)
@@ -84,12 +109,12 @@ bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Descripti
         adjLen -= begPos + adjLen - sentence.length();
     }
 
+    // 开始查找形容词
     std::wstring tmp = sentence.substr(begPos, adjLen);
-
     for (std::wstring adjective : adjectiveList)
     {
-        std::wregex adjectiveMatch(adjective);
-        if (std::regex_search(tmp, adjectiveMatch))
+        int find = tmp.find(adjective);
+        if (find != std::wstring::npos)
         {
             // std::wcout << L"Matched adjective: " << adjective << std::endl;
             description->adjective = adjective;
@@ -102,51 +127,20 @@ bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Descripti
 
 std::pair<int, int> Keyword::match(std::wstring &sentence)
 {
-    std::wsmatch match;
     for (int i = 0; i < similarWords.size(); i++)
     {
         std::wstring similarWord = similarWords[i];
-        std::wregex similarWordMatch(similarWord);
-        if (std::regex_search(sentence, match, similarWordMatch))
+        int find = sentence.find(similarWord);
+        if (find != std::wstring::npos)
         {
             // std::wcout << L"Matched keyword: " << similarWord << std::endl;
 
-            int pos = match.position(0);
+            int pos = find;
 
             return std::make_pair(pos, i);
         }
     }
     return std::make_pair(-1, -1);
-}
-
-std::wstring Keyword::getWord() const
-{
-    return word;
-}
-
-std::vector<std::wstring> Keyword::getSimilarWords() const
-{
-    return similarWords;
-}
-
-std::wstring Keyword::getSimilarWord(int index) const
-{
-    return similarWords[index];
-}
-
-std::vector<std::wstring> Keyword::getAdjectiveList() const
-{
-    return adjectiveList;
-}
-
-std::vector<std::shared_ptr<Keyword>> Keyword::getPrevKeywords() const
-{
-    return prevKeywords;
-}
-
-std::vector<std::shared_ptr<Keyword>> Keyword::getNextKeywords()
-{
-    return nextKeywords;
 }
 
 wchar_t *Keyword::performAction(std::shared_ptr<Description> input) const

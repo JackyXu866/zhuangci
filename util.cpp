@@ -2,6 +2,26 @@
 #include "util.h"
 
 
+// 是否为中文数字
+bool isChineseNum(wchar_t c){
+    for(int i=0; i<cnNumAll.size(); i++){
+        if(c == cnNumAll[i]){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// 中文数字转阿拉伯数字，如果是其他的则返回原字符
+wchar_t convertChineseNum(wchar_t c){
+    for(int i=0; i<cnNum.size(); i++){
+        if(c == cnNum[i]) return (L'0'+i);
+    }
+
+    return c;
+}
+
 /**
  * @brief 将中文数字替换为阿拉伯数字
  * 
@@ -10,26 +30,27 @@
  */
 void replaceChineseNum(std::wstring &sentence)
 {
-    std::wsmatch match;
-    std::wstring::const_iterator iterStart = sentence.begin();
-    std::wstring::const_iterator iterEnd = sentence.end();
-    std::wstring temp;
-    int index = 0;
-    while (std::regex_search(iterStart, iterEnd, match, cnNumMatch))
-    {
-        temp = match[0];
-        index += match.position(0);
-        // std::wcout << temp << " at " << index << " with size "
-        // << temp.size() << std::endl;
-        iterStart = match[0].second;
-
-        std::wstring numStr = std::to_wstring(chineseNumToInt(temp));
-
-        // replace the number
-        sentence.replace(match[0].first, match[0].second, numStr.begin(), numStr.end());
+    int p = 0;
+    // 查找含有中文数字的位置
+    while(p < sentence.size()){
+        // 找到一组连续的中文数字
+        int beg = p, end = p;
+        while(end < sentence.size() && isChineseNum(sentence[end])){
+            end++;
+        }
+        // 没有中文数字
+        if(beg == end){
+            p++;
+            continue;
+        }
+        // 替换
+        std::wstring num = sentence.substr(beg, end-beg);
+        int n = chineseNumToInt(num);
+        sentence.replace(beg, end-beg, std::to_wstring(n));
+        p = beg + std::to_wstring(n).size();
     }
 
-    // std::wcout << "sentence: " << sentence << std::endl;
+    std::wcout << sentence << std::endl;
 }
 
 /**
@@ -41,55 +62,52 @@ void replaceChineseNum(std::wstring &sentence)
 int chineseNumToInt(std::wstring &num)
 {
 
-    // replace all digits
-    for (int i = 0; i < NUMBER_COUNT; i++)
-    {
-        std::wstring digit = chineseNumber[i];
-        std::wregex digitMatch(digit);
-        num = std::regex_replace(num, digitMatch, std::to_wstring(i));
+    // 替换所有数字字符
+    for(int i=0; i<num.size(); i++){
+        num[i] = convertChineseNum(num[i]);
     }
 
-    // if no unit, e.g. 一二三, return 123
-    if (!std::regex_search(num, cnUnit))
-    {
-        return std::stoi(num);
-    }
-
-    // remove all 0
-    num = std::regex_replace(num, std::wregex(L"0"), L"");
-
-    // replace all units
-    int rt = 0;
-    int currPos = 0;
-    std::wstring::const_iterator iterStart = num.begin();
-    std::wstring::const_iterator iterEnd = num.end();
-    std::wsmatch match;
-    while (std::regex_search(iterStart, iterEnd, match, cnUnit))
-    {
-        std::wstring unit = match[0];
-        int pos = match.position(0);
-        currPos += pos;
-        std::wstring tdigit = num.substr(currPos - 1, 1);
-        if (!std::regex_match(tdigit, std::wregex(L"[1-9]")))
-        {
-            tdigit = L"1";
+    // 如果是纯数字, e.g. 一二三, return 123
+    int pureNum = true;
+    for(int i=0; i<num.size(); i++){
+        for(int j=0; j<cnUnit.size(); j++){
+            if(num[i] == cnUnit[j]){
+                pureNum = false;
+                break;
+            }
         }
-        int digit = std::stoi(tdigit);
-        rt += (digit * chineseUnit[unit]);
-
-        currPos += 1;
-        iterStart = match[0].second;
     }
-    // last digit
-    std::wstring tdigit = num.substr(num.size() - 1, 1);
-    if (std::regex_match(tdigit, std::wregex(L"[1-9]")))
-    {
-        rt += std::stoi(tdigit);
+    if(pureNum) return std::stoi(num);
+
+    // 删除所有 0
+    for(int i=0; i<num.size(); i++){
+        if(num[i] == L'0'){
+            num.erase(i, 1);
+            i--;
+        }
+    }
+
+    // 处理有单位的数字
+    int rt = 0;
+    int prevNum = 1;
+    for(int i=0; i<num.size(); i++){
+        // 是数字
+        if(num[i]-L'0' >= 1 && num[i]-L'0' <= 9){
+            prevNum = num[i]-L'0';
+        }
+        else{   // 是单位
+            rt += (prevNum * chineseUnit[num[i]]);
+        }
+    }
+    // 处理最后一个数字
+    if(num[num.size()-1]-L'0' >= 1 && num[num.size()-1]-L'0' <= 9){
+        rt += (num[num.size()-1]-L'0');
     }
 
     return rt;
 }
 
+// 找到一个vector中任意词的位置
 int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p){
     int pos = -1;
     for(std::wstring& d : vec){
