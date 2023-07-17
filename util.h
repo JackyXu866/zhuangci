@@ -32,7 +32,6 @@ static std::vector<std::wstring> dayVec = {L"天", L"日"};
 static std::vector<std::wstring> weekVec = {L"周", L"星期", L"礼拜"};
 static std::vector<std::wstring> dateVec = {L"日", L"号"};
 
-
 // 地点 [旗|县|省|市|区]
 
 bool isChineseNum(wchar_t c);
@@ -40,11 +39,11 @@ bool isChineseNum(wchar_t c);
 void replaceChineseNum(std::wstring &sentence);
 int chineseNumToInt(std::wstring &num);
 
-int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p);
-int unsureInt(int sizeMax, std::wstring& sentence, int pos);
+int locateKey(std::wstring &sentence, std::vector<std::wstring> &vec, int p);
+int unsureInt(int sizeMax, std::wstring &sentence, int pos);
 
 bool matchDay(std::wstring &sentence, struct tm *time);
-bool matchWeek(std::wstring& sentence, struct tm* time);
-bool matchDate(std::wstring& sentence, struct tm* time);
+bool matchWeek(std::wstring &sentence, struct tm *time);
+bool matchDate(std::wstring &sentence, struct tm *time);
 
 #endif // UTIL_H

@@ -53,7 +53,6 @@ std::shared_ptr<Database> readConfig(char *config)
                 if (db->keywords.find(line) != db->keywords.end())
                 {
                     keyword = db->keywords[line];
-                    // std::wcout << L"找到已有关键词: " << line << std::endl;
                 }
                 else
                 {
@@ -61,7 +60,6 @@ std::shared_ptr<Database> readConfig(char *config)
                     db->keywords[line] = keyword;
                 }
                 type = 3;
-                // std::wcout << "Begin: " << line << std::endl;
             }
             else if (type == 1)
             {
@@ -73,12 +71,9 @@ std::shared_ptr<Database> readConfig(char *config)
                     keyword->ADJ_SEARCH_TYPE = line[4] - L'0';
                     keyword->ADJ_GAP_SPACE = std::stoi(line.substr(6));
 
-                    // std::wcout << L"ADJ_SEARCH_TYPE: " << keyword->ADJ_SEARCH_TYPE << std::endl;
-                    // std::wcout << L"ADJ_GAP_SPACE: " << keyword->ADJ_GAP_SPACE << std::endl;
                     continue;
                 }
                 keyword->addAdjective(line);
-                // std::wcout << "Adj: " << line << std::endl;
             }
             else if (type == 2)
             {
@@ -89,16 +84,13 @@ std::shared_ptr<Database> readConfig(char *config)
                 }
                 keyword->addPrevKeyword(db->keywords[line]);
                 db->keywords[line]->addNextKeyword(keyword);
-                // std::wcout << db->keywords[line]->getWord() << L"Add next keyword: " << keyword->getWord() << std::endl;
 
                 keyword->head = false;
                 db->keywords[line]->tail = false;
-                // std::wcout << "Prev: " << line << std::endl;
             }
             else
             {
                 keyword->addSimilarWord(line);
-                // std::wcout << "Key: " << line << std::endl;
             }
         }
         line.clear();
@@ -120,7 +112,6 @@ void FilterDB(std::shared_ptr<Database> db)
         if (k->head)
         {
             db->headKeywords.push_back(k);
-            // std::wcout << L"Head keyword: " << k->getWord() << std::endl;
         }
     }
 }
@@ -169,21 +160,18 @@ int matchKeyword(std::wstring sentence, std::shared_ptr<Keyword> k, std::shared_
 
         // 找出语句中出现的那个近义词
         description->word = k->getSimilarWord(which);
-        // std::wcout << L"Matched keyword: " << k->getWord() << std::endl;
         struct tm *t = matchDate(sentence);
 
         // 更新tempKeywords，用于下一轮匹配 （多轮需求）
         db->tempKeywords = k->getNextKeywords();
-        // std::wcout << db->tempKeywords.size() << std::endl;
 
         // 更正时间
         std::mktime(t);
         description->time = t;
-        // std::wcout << std::asctime(description->time) << std::endl;
 
-        wchar_t* r = (k->performAction(description));
+        wchar_t *r = (k->performAction(description));
         std::wcout << r << std::endl;
-        
+
         delete[] r;
 
         return 1;
@@ -231,14 +219,14 @@ int main(int argc, char *argv[])
 
     std::wstring input = L"";
     std::wstring exit = L"exit";
-    // std::wcout.imbue(std::locale("", LC_CTYPE));
 
     // 把输入流的编码转换成本地编码，不然windows下会乱码
     std::wcin.imbue(std::locale(""));
     while (true)
     {
         std::wcout << L"请输入：";
-        if(!(std::wcin >> input) || input == L"") continue;
+        if (!(std::wcin >> input) || input == L"")
+            continue;
         if (input == exit)
             break;
         replaceChineseNum(input);

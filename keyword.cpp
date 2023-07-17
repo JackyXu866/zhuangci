@@ -116,7 +116,6 @@ bool Keyword::findAdj(std::wstring &sentence, int pos, std::shared_ptr<Descripti
         int find = tmp.find(adjective);
         if (find != std::wstring::npos)
         {
-            // std::wcout << L"Matched adjective: " << adjective << std::endl;
             description->adjective = adjective;
             return true;
         }
@@ -133,8 +132,6 @@ std::pair<int, int> Keyword::match(std::wstring &sentence)
         int find = sentence.find(similarWord);
         if (find != std::wstring::npos)
         {
-            // std::wcout << L"Matched keyword: " << similarWord << std::endl;
-
             int pos = find;
 
             return std::make_pair(pos, i);

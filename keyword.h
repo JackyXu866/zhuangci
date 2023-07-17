@@ -35,7 +35,6 @@ public:
  * };
  */
 
-
 // 关键词类
 class Keyword
 {
@@ -47,7 +46,6 @@ public:
     void addAdjective(std::wstring adjective);
     void addPrevKeyword(std::shared_ptr<Keyword> prevKeyword);
     void addNextKeyword(std::shared_ptr<Keyword> nextKeyword);
-
 
     // 访问器 (Accessors)
     std::wstring getWord() const;
@@ -81,7 +79,7 @@ public:
      * @param input 描述
      * @return wchar_t* JSON格式的返回值
      */
-    wchar_t* performAction(std::shared_ptr<Description> input) const;
+    wchar_t *performAction(std::shared_ptr<Description> input) const;
 
     int ADJ_GAP_SPACE; // 形容词与关键词之间的最大间隔
     // 形容词搜索方式，0为从关键词位置开始向前搜索，1为向后搜索，2为双向搜索
@@ -89,10 +87,10 @@ public:
     bool head, tail, mustAdj; // 是否为头，尾，必须有形容词
 
 private:
-    std::wstring word;                                       // 关键词（技能名称）
-    std::vector<std::wstring> similarWords;                  // 与关键词相似的词（含关键词本身）
-    std::vector<std::wstring> adjectiveList;                 // 形容词列表
-    size_t maxAdjLen;                                        // 形容词最大长度
+    std::wstring word;                       // 关键词（技能名称）
+    std::vector<std::wstring> similarWords;  // 与关键词相似的词（含关键词本身）
+    std::vector<std::wstring> adjectiveList; // 形容词列表
+    size_t maxAdjLen;                        // 形容词最大长度
     // std::function<int(std::shared_ptr<Description>)> action; // action to be performed when keyword is detected, takes in adjective
 
     // 多轮

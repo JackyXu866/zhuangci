@@ -8,12 +8,13 @@
 
 class Keyword;
 
-class Database{
+class Database
+{
 public:
-    Database(){keywords = std::unordered_map<std::wstring, std::shared_ptr<Keyword>>();};
+    Database() { keywords = std::unordered_map<std::wstring, std::shared_ptr<Keyword>>(); };
     std::unordered_map<std::wstring, std::shared_ptr<Keyword>> keywords;
-    std::vector<std::shared_ptr<Keyword>> headKeywords;     // always query
-    std::vector<std::shared_ptr<Keyword>> tempKeywords;     // 多轮启动
+    std::vector<std::shared_ptr<Keyword>> headKeywords; // always query
+    std::vector<std::shared_ptr<Keyword>> tempKeywords; // 多轮启动
 };
 
 #endif // DATABASE_H

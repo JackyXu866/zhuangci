@@ -1,11 +1,13 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include "util.h"
 
-
 // 是否为中文数字
-bool isChineseNum(wchar_t c){
-    for(int i=0; i<cnNumAll.size(); i++){
-        if(c == cnNumAll[i]){
+bool isChineseNum(wchar_t c)
+{
+    for (int i = 0; i < cnNumAll.size(); i++)
+    {
+        if (c == cnNumAll[i])
+        {
             return true;
         }
     }
@@ -14,9 +16,12 @@ bool isChineseNum(wchar_t c){
 }
 
 // 中文数字转阿拉伯数字，如果是其他的则返回原字符
-wchar_t convertChineseNum(wchar_t c){
-    for(int i=0; i<cnNum.size(); i++){
-        if(c == cnNum[i]) return (L'0'+i);
+wchar_t convertChineseNum(wchar_t c)
+{
+    for (int i = 0; i < cnNum.size(); i++)
+    {
+        if (c == cnNum[i])
+            return (L'0' + i);
     }
 
     return c;
@@ -24,7 +29,7 @@ wchar_t convertChineseNum(wchar_t c){
 
 /**
  * @brief 将中文数字替换为阿拉伯数字
- * 
+ *
  * @param sentence 待替换的句子
  * @return std::wstring 替换后的句子
  */
@@ -32,30 +37,31 @@ void replaceChineseNum(std::wstring &sentence)
 {
     int p = 0;
     // 查找含有中文数字的位置
-    while(p < sentence.size()){
+    while (p < sentence.size())
+    {
         // 找到一组连续的中文数字
         int beg = p, end = p;
-        while(end < sentence.size() && isChineseNum(sentence[end])){
+        while (end < sentence.size() && isChineseNum(sentence[end]))
+        {
             end++;
         }
         // 没有中文数字
-        if(beg == end){
+        if (beg == end)
+        {
             p++;
             continue;
         }
         // 替换
-        std::wstring num = sentence.substr(beg, end-beg);
+        std::wstring num = sentence.substr(beg, end - beg);
         int n = chineseNumToInt(num);
-        sentence.replace(beg, end-beg, std::to_wstring(n));
+        sentence.replace(beg, end - beg, std::to_wstring(n));
         p = beg + std::to_wstring(n).size();
     }
-
-    std::wcout << sentence << std::endl;
 }
 
 /**
  * @brief 将中文数字转换为阿拉伯数字
- * 
+ *
  * @param num 中文数字
  * @return int 阿拉伯数字
  */
@@ -63,25 +69,32 @@ int chineseNumToInt(std::wstring &num)
 {
 
     // 替换所有数字字符
-    for(int i=0; i<num.size(); i++){
+    for (int i = 0; i < num.size(); i++)
+    {
         num[i] = convertChineseNum(num[i]);
     }
 
     // 如果是纯数字, e.g. 一二三, return 123
     int pureNum = true;
-    for(int i=0; i<num.size(); i++){
-        for(int j=0; j<cnUnit.size(); j++){
-            if(num[i] == cnUnit[j]){
+    for (int i = 0; i < num.size(); i++)
+    {
+        for (int j = 0; j < cnUnit.size(); j++)
+        {
+            if (num[i] == cnUnit[j])
+            {
                 pureNum = false;
                 break;
             }
         }
     }
-    if(pureNum) return std::stoi(num);
+    if (pureNum)
+        return std::stoi(num);
 
     // 删除所有 0
-    for(int i=0; i<num.size(); i++){
-        if(num[i] == L'0'){
+    for (int i = 0; i < num.size(); i++)
+    {
+        if (num[i] == L'0')
+        {
             num.erase(i, 1);
             i--;
         }
@@ -90,29 +103,36 @@ int chineseNumToInt(std::wstring &num)
     // 处理有单位的数字
     int rt = 0;
     int prevNum = 1;
-    for(int i=0; i<num.size(); i++){
+    for (int i = 0; i < num.size(); i++)
+    {
         // 是数字
-        if(num[i]-L'0' >= 1 && num[i]-L'0' <= 9){
-            prevNum = num[i]-L'0';
+        if (num[i] - L'0' >= 1 && num[i] - L'0' <= 9)
+        {
+            prevNum = num[i] - L'0';
         }
-        else{   // 是单位
+        else
+        { // 是单位
             rt += (prevNum * chineseUnit[num[i]]);
         }
     }
     // 处理最后一个数字
-    if(num[num.size()-1]-L'0' >= 1 && num[num.size()-1]-L'0' <= 9){
-        rt += (num[num.size()-1]-L'0');
+    if (num[num.size() - 1] - L'0' >= 1 && num[num.size() - 1] - L'0' <= 9)
+    {
+        rt += (num[num.size() - 1] - L'0');
     }
 
     return rt;
 }
 
 // 找到一个vector中任意词的位置
-int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p){
+int locateKey(std::wstring &sentence, std::vector<std::wstring> &vec, int p)
+{
     int pos = -1;
-    for(std::wstring& d : vec){
+    for (std::wstring &d : vec)
+    {
         pos = std::max((int)sentence.find(d, p), pos);
-        if(pos != std::wstring::npos){
+        if (pos != std::wstring::npos)
+        {
             break;
         }
     }
@@ -124,22 +144,29 @@ int locateKey(std::wstring& sentence, std::vector<std::wstring>& vec, int p){
 // @param sentence: 句子
 // @param pos: 根部（个位）位置
 // @return int: 数字，-1表示没找到
-int unsureInt(int sizeMax, std::wstring& sentence, int pos){
-    if(pos < 0 || pos >= sentence.size()) return -1;
+int unsureInt(int sizeMax, std::wstring &sentence, int pos)
+{
+    if (pos < 0 || pos >= sentence.size())
+        return -1;
 
     int rt = 0;
     int size = 0;
 
-    while(size < sizeMax){
-        int p = pos-size;
-        if(p < 0) break;
+    while (size < sizeMax)
+    {
+        int p = pos - size;
+        if (p < 0)
+            break;
         wchar_t c = sentence[pos - size];
-        if(c >= L'0' && c <= L'9'){
+        if (c >= L'0' && c <= L'9')
+        {
             rt += ((c - L'0') * std::pow(10, size));
         }
         // 没找到数字
-        else if(size == 0) return -1;
-        else break;
+        else if (size == 0)
+            return -1;
+        else
+            break;
 
         size++;
     }
@@ -147,18 +174,23 @@ int unsureInt(int sizeMax, std::wstring& sentence, int pos){
 }
 
 // pattern match day without regex
-bool matchDay(std::wstring& sentence, struct tm* time){
-    int p = 0;  // 当前位置，循环直到找到所有的时间词或者找不到为止
+bool matchDay(std::wstring &sentence, struct tm *time)
+{
+    int p = 0; // 当前位置，循环直到找到所有的时间词或者找不到为止
     // 先找定位词 天/日
-    while(p < sentence.size()){
+    while (p < sentence.size())
+    {
         int pos = locateKey(sentence, dayVec, p);
-        if(pos == std::wstring::npos || pos == 0){
+        if (pos == std::wstring::npos || pos == 0)
+        {
             break;
         }
 
         // 找表达时间词
-        for(std::pair<wchar_t, int> p : dayTimeMap){
-            if(sentence.find(p.first) != std::wstring::npos){
+        for (std::pair<wchar_t, int> p : dayTimeMap)
+        {
+            if (sentence.find(p.first) != std::wstring::npos)
+            {
                 time->tm_mday += p.second;
                 return true;
             }
@@ -170,17 +202,20 @@ bool matchDay(std::wstring& sentence, struct tm* time){
 }
 
 // pattern match week without regex
-bool matchWeek(std::wstring& sentence, struct tm* time){
-    int p = 0;  // 当前位置，循环直到找到所有的时间词或者找不到为止
+bool matchWeek(std::wstring &sentence, struct tm *time)
+{
+    int p = 0; // 当前位置，循环直到找到所有的时间词或者找不到为止
     // 先找定位词 周
-    while(p < sentence.size()){
+    while (p < sentence.size())
+    {
         int pos = locateKey(sentence, weekVec, p);
-        if(pos == std::wstring::npos || pos == sentence.size()-1){
+        if (pos == std::wstring::npos || pos == sentence.size() - 1)
+        {
             break;
         }
 
         // 先找表达时间词
-        wchar_t last = sentence[pos+1];
+        wchar_t last = sentence[pos + 1];
         int day = 0;
         if (last == L'天' || last == L'日')
         {
@@ -190,7 +225,8 @@ bool matchWeek(std::wstring& sentence, struct tm* time){
         {
             day = last - L'0';
             // 错误的时间词
-            if(day < 1 || day > 7){
+            if (day < 1 || day > 7)
+            {
                 p = pos + 1;
                 continue;
             }
@@ -217,24 +253,27 @@ bool matchWeek(std::wstring& sentence, struct tm* time){
         return true;
     }
     return false;
-
 }
 
 // xxxx年xx月xx日，只要找到日就行
-bool matchDate(std::wstring& sentence, struct tm* time){
+bool matchDate(std::wstring &sentence, struct tm *time)
+{
     int p = 0;
     // 先找 最小时间单位(天数)
-    while(p < sentence.size()){
+    while (p < sentence.size())
+    {
         int posDay = locateKey(sentence, dateVec, p);
-        if(posDay == std::wstring::npos || posDay == 0){
+        if (posDay == std::wstring::npos || posDay == 0)
+        {
             break;
         }
 
         // 确定天数
-        int mday = unsureInt(2, sentence, posDay-1);
+        int mday = unsureInt(2, sentence, posDay - 1);
 
         // 验证天数
-        if(mday < 1 || mday > 31){
+        if (mday < 1 || mday > 31)
+        {
             p = posDay + 1;
             continue;
         }
@@ -243,16 +282,21 @@ bool matchDate(std::wstring& sentence, struct tm* time){
 
         // 确定月份
         int posMonth = posDay;
-        if(mday >= 10) posMonth -= 3;
-        else posMonth -= 2;
+        if (mday >= 10)
+            posMonth -= 3;
+        else
+            posMonth -= 2;
 
-        if(posMonth < 0) return true;
-        if(sentence[posMonth] != L'月'){
+        if (posMonth < 0)
+            return true;
+        if (sentence[posMonth] != L'月')
+        {
             return true;
         }
 
-        int month = unsureInt(2, sentence, posMonth-1);
-        if(month < 1 || month > 12){
+        int month = unsureInt(2, sentence, posMonth - 1);
+        if (month < 1 || month > 12)
+        {
             return true;
         }
         time->tm_mon = month - 1;
@@ -260,20 +304,28 @@ bool matchDate(std::wstring& sentence, struct tm* time){
 
         // 确定年份
         int posYear = posMonth;
-        if(month >= 10) posYear -= 3;
-        else posYear -= 2;
+        if (month >= 10)
+            posYear -= 3;
+        else
+            posYear -= 2;
 
-        if(posYear < 0) return true;
-        if(sentence[posYear] != L'年'){
+        if (posYear < 0)
+            return true;
+        if (sentence[posYear] != L'年')
+        {
             return true;
         }
 
-        int year = unsureInt(4, sentence, posYear-1);
-        if(year < 0) return true;
+        int year = unsureInt(4, sentence, posYear - 1);
+        if (year < 0)
+            return true;
         // 支持两位数年份
-        if(year < 40) year += 2000;
-        else if(year < 100) year += 1900;
-        else if(year < 1900) return true;
+        if (year < 40)
+            year += 2000;
+        else if (year < 100)
+            year += 1900;
+        else if (year < 1900)
+            return true;
         time->tm_year = year - 1900;
 
         return true;
