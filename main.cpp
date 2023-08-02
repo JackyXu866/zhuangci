@@ -127,6 +127,16 @@ int matchKeyword(std::wstring sentence, std::shared_ptr<Keyword> k,
     int which = p.second;
 
     if (find != -1) {
+        // 直接回答
+        if (k->respond) {
+            std::wstring r = (k->performAction(nullptr));
+            std::wcout << r << std::endl;
+
+            db->json_return = r;
+
+            return 1;
+        }
+
         std::shared_ptr<Description> description(new Description());
         bool adjFound = k->findAdj(sentence, find, description);
         // 在用户配置必须找到形容词的关键词做判定
@@ -184,6 +194,7 @@ int main(int argc, char *argv[]) {
 
     // 读取配置文件，之后需要改成sql
     std::shared_ptr<Database> db = readConfig(argv[1]);
+    readCSV_skill("skill.csv", db);
     FilterDB(db);
 
     std::wstring input = L"";
@@ -224,5 +235,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
 #endif

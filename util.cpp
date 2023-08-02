@@ -283,7 +283,8 @@ bool matchDate(std::wstring &sentence, struct tm *time) {
 
 void readCSV_skill(const char *path, std::shared_ptr<Database> db) {
     // TODO: windows不支持中文路径，需要在windows环境使用`_wfopen`
-    FILE *file = std::fopen(path, "rb,ccs=UTF-8");
+    // FILE* file = _wfopen(L"test.csv", L"rb,ccs=UTF-8");
+    FILE *file = std::fopen(path, "r,ccs=UTF-8");
     if (!file) {
         std::cout << "Error opening file " << path << std::endl;
         return;
@@ -295,9 +296,10 @@ void readCSV_skill(const char *path, std::shared_ptr<Database> db) {
     std::wstring temp = L"";
     bool isComplete = false;  // true if one segment is complete
     std::shared_ptr<Keyword> keyword = nullptr;
-    while (c = std::fgetwc(file) != EOF) {
+    while ((c = std::fgetwc(file)) != EOF) {
+        if (feof(file)) break;      // 神奇的eof while不能停住
         wchar_t ch = (wchar_t)c;
-        std::wcout << c;
+        // std::wcout << ch << std::endl;
         switch (ch) {
             case ',':  // end of cell
                 // cell text contains ,
@@ -322,7 +324,8 @@ void readCSV_skill(const char *path, std::shared_ptr<Database> db) {
                 break;
         }
 
-        if (temp == L"" || !isComplete) continue;
+        if (temp == L"") isComplete = false;
+        if (!isComplete) continue;
         // TODO: add to database
         switch (numCell) {
             case 0:  // skill name
@@ -334,30 +337,25 @@ void readCSV_skill(const char *path, std::shared_ptr<Database> db) {
                         std::shared_ptr<Keyword>(new Keyword(temp, false));
                     db->keywords[temp] = keyword;
                 }
-                std::wcout << L"读取技能: " << temp << L"\n";
+                keyword->respond = true;
+                // std::wcout << L"读取技能: " << temp << L"\n";
                 break;
             case 1:  // similar words
                 keyword->addSimilarWord(temp);
+                // std::wcout << L"读取近义词: " << temp << L"\n";
                 break;
             case 2:  // response
                 keyword->addResponse(temp);
+                // std::wcout << L"读取回复: " << temp << L"\n";
                 break;
             default:
                 break;
         }
         temp = L"";
+        isComplete = false;
 
         // completed one cell
         if (!multiline) numCell++;
         if (!multiline && numCell > 2) numCell = 0;
     }
-}
-
-int main() {
-    setlocale(LC_ALL, "zh_CN.UTF-8");
-    std::shared_ptr<Database> db = std::shared_ptr<Database>(new Database());
-    readCSV_skill("./test.csv", db);
-    std::wcout << L"\n读取完成\n";
-
-    return 0;
 }

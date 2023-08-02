@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <random>
 
 #include "util.h"
 
@@ -87,6 +88,7 @@ class Keyword {
     // 形容词搜索方式，0为从关键词位置开始向前搜索，1为向后搜索，2为双向搜索
     int ADJ_SEARCH_TYPE;
     bool head, tail, mustAdj;  // 是否为头，尾，必须有形容词
+    bool respond;                             // 是否回复
 
    private:
     std::wstring word;                       // 关键词（技能名称）
@@ -94,7 +96,11 @@ class Keyword {
     std::vector<std::wstring> adjectiveList;  // 形容词列表
     size_t maxAdjLen;                         // 形容词最大长度
     std::vector<std::wstring> responseList;   // 回复列表
-    bool respond;                             // 是否回复
+
+    // 随机
+    std::random_device rd;
+    mutable std::mt19937 rng;
+    std::uniform_int_distribution<int> randResp;
 
     // 多轮
     // 匹配逻辑：在从数据库读取时获取每个关键词前置及后置关键词

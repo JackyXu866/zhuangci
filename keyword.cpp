@@ -22,6 +22,9 @@ Keyword::Keyword(std::wstring word, bool addtoList) : word(word) {
     tail = true;
     mustAdj = false;
     repeat = 1;
+
+    rng = std::mt19937(rd());
+    randResp = std::uniform_int_distribution<>(0, RAND_MAX);
 }
 
 void Keyword::addSimilarWord(std::wstring similarWord) {
@@ -60,7 +63,7 @@ std::vector<std::wstring> Keyword::getAdjectiveList() const {
 }
 
 std::wstring Keyword::getResponse() const {
-    return responseList[rand() % responseList.size()];
+    return responseList[randResp(rng) % responseList.size()];
 }
 
 std::vector<std::shared_ptr<Keyword>> Keyword::getPrevKeywords() const {
@@ -98,8 +101,8 @@ bool Keyword::findAdj(std::wstring &sentence, int pos,
         adjLen += begPos;
         begPos = 0;
     }
-    if ((size_t)(begPos + adjLen) > sentence.length()) {
-        adjLen -= begPos + adjLen - sentence.length();
+    if (((size_t)begPos + (size_t)adjLen) > sentence.length()) {
+        adjLen -= begPos + adjLen - (int)sentence.length();
     }
 
     // 开始查找形容词
@@ -132,13 +135,21 @@ std::wstring Keyword::performAction(std::shared_ptr<Description> input) const {
     // 构建JSON格式的返回参数
     std::wstring result;
     result += L"{";
-    result += L"\"技能名称\":\"" + word + L"\",";
-    result += L"\"具体词语\":\"" + input->word + L"\",";
-    result += L"\"技能时间\":\"" +
-              std::to_wstring(input->time->tm_year + 1900) + L"/" +
-              std::to_wstring(input->time->tm_mon + 1) + L"/" +
-              std::to_wstring(input->time->tm_mday) + L"\",";
-    result += L"\"技能形容\":\"" + input->adjective + L"\"";
+    if (respond) {
+        result += L"\"type\":\"voice\",";
+        result += L"\"技能名称\":\"" + word + L"\",";
+        result += L"\"回复\":\"" + this->getResponse() + L"\"";
+    }
+    else if (input != nullptr) {
+        result += L"\"type\":\"skill\",";
+        result += L"\"技能名称\":\"" + word + L"\",";
+        result += L"\"具体词语\":\"" + input->word + L"\",";
+        result += L"\"技能时间\":\"" +
+                  std::to_wstring(input->time->tm_year + 1900) + L"/" +
+                  std::to_wstring(input->time->tm_mon + 1) + L"/" +
+                  std::to_wstring(input->time->tm_mday) + L"\",";
+        result += L"\"技能形容\":\"" + input->adjective + L"\"";
+    }
     result += L"}\n";
 
     return result;
