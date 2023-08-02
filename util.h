@@ -1,31 +1,32 @@
 ﻿#ifndef UTIL_H
 #define UTIL_H
-#include <unordered_map>
-#include <iostream>
-#include <string>
-#include <ctime>
-#include <locale>
 #include <cmath>
-#include <vector>
-#include <memory>
 #include <codecvt>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <locale>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include "keyword.h"
 #include "database.h"
 #include "httplib.h"
+#include "keyword.h"
 
 // 数字相关
 static std::unordered_map<wchar_t, int> chineseUnit = {
     {L'十', 10}, {L'百', 100}, {L'千', 1000}, {L'万', 10000}};
 
-static std::vector<wchar_t> cnNum = {
-    L'零', L'一', L'二', L'三', L'四',
-    L'五', L'六', L'七', L'八', L'九'};
-static std::vector<wchar_t> cnNumAll = {
-    L'零', L'一', L'二', L'三', L'四',
-    L'五', L'六', L'七', L'八', L'九', L'十', L'百', L'千', L'万'};
-static std::vector<wchar_t> cnUnit = {
-    L'十', L'百', L'千', L'万'};
+static std::vector<wchar_t> cnNum = {L'零', L'一', L'二', L'三', L'四',
+                                     L'五', L'六', L'七', L'八', L'九'};
+static std::vector<wchar_t> cnNumAll = {L'零', L'一', L'二', L'三', L'四',
+                                        L'五', L'六', L'七', L'八', L'九',
+                                        L'十', L'百', L'千', L'万'};
+static std::vector<wchar_t> cnUnit = {L'十', L'百', L'千', L'万'};
 
 // 日期相关
 static std::unordered_map<wchar_t, int> dayTimeMap = {
@@ -48,4 +49,6 @@ bool matchDay(std::wstring &sentence, struct tm *time);
 bool matchWeek(std::wstring &sentence, struct tm *time);
 bool matchDate(std::wstring &sentence, struct tm *time);
 
-#endif // UTIL_H
+void readCSV_skill(const char *path, std::shared_ptr<Database> db);
+
+#endif  // UTIL_H

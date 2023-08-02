@@ -3,17 +3,16 @@
 #ifndef KEYWORD_H
 #define KEYWORD_H
 
-#include <vector>
-#include <string>
 #include <functional>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "util.h"
 
 // 关键词的详细信息，用来返回给接口
-class Description
-{
-public:
+class Description {
+   public:
     Description() { adjective = L""; };
     std::wstring adjective;
     struct tm *time;
@@ -36,14 +35,14 @@ public:
  */
 
 // 关键词类
-class Keyword
-{
-public:
-    Keyword(std::wstring word);
+class Keyword {
+   public:
+    Keyword(std::wstring word, bool addtoList=true);
 
     // 修改器 (Modifiers)
     void addSimilarWord(std::wstring similarWord);
     void addAdjective(std::wstring adjective);
+    void addResponse(std::wstring response);
     void addPrevKeyword(std::shared_ptr<Keyword> prevKeyword);
     void addNextKeyword(std::shared_ptr<Keyword> nextKeyword);
 
@@ -52,6 +51,7 @@ public:
     std::vector<std::wstring> getSimilarWords() const;
     std::wstring getSimilarWord(int index) const;
     std::vector<std::wstring> getAdjectiveList() const;
+    std::wstring getResponse() const;
     std::vector<std::shared_ptr<Keyword>> getPrevKeywords() const;
     std::vector<std::shared_ptr<Keyword>> getNextKeywords();
 
@@ -64,13 +64,15 @@ public:
      * @return true 找到形容词
      * @return false 未找到形容词
      */
-    bool findAdj(std::wstring &sentence, int pos, std::shared_ptr<Description> description);
+    bool findAdj(std::wstring &sentence, int pos,
+                 std::shared_ptr<Description> description);
 
     /**
      * @brief 找到句子里的关键词，返回关键词的位置和关键词在similarWords里的位置
      *
      * @param sentence 句子
-     * @return std::pair<int, int> 如果找到，返回pair<位置, similar word(int)>，否则返回<-1, -1>
+     * @return std::pair<int, int> 如果找到，返回pair<位置, similar
+     * word(int)>，否则返回<-1, -1>
      */
     std::pair<int, int> match(std::wstring &sentence);
     /**
@@ -81,17 +83,18 @@ public:
      */
     std::wstring performAction(std::shared_ptr<Description> input) const;
 
-    int ADJ_GAP_SPACE; // 形容词与关键词之间的最大间隔
+    int ADJ_GAP_SPACE;  // 形容词与关键词之间的最大间隔
     // 形容词搜索方式，0为从关键词位置开始向前搜索，1为向后搜索，2为双向搜索
     int ADJ_SEARCH_TYPE;
-    bool head, tail, mustAdj; // 是否为头，尾，必须有形容词
+    bool head, tail, mustAdj;  // 是否为头，尾，必须有形容词
 
-private:
+   private:
     std::wstring word;                       // 关键词（技能名称）
     std::vector<std::wstring> similarWords;  // 与关键词相似的词（含关键词本身）
-    std::vector<std::wstring> adjectiveList; // 形容词列表
-    size_t maxAdjLen;                        // 形容词最大长度
-    // std::function<int(std::shared_ptr<Description>)> action; // action to be performed when keyword is detected, takes in adjective
+    std::vector<std::wstring> adjectiveList;  // 形容词列表
+    size_t maxAdjLen;                         // 形容词最大长度
+    std::vector<std::wstring> responseList;   // 回复列表
+    bool respond;                             // 是否回复
 
     // 多轮
     // 匹配逻辑：在从数据库读取时获取每个关键词前置及后置关键词
@@ -99,9 +102,9 @@ private:
     // 如果没有匹配到任意关键词，则将tempKeywords清空
     // 匹配到没有后置的关键词，因为nextKeywords本就是空的，所以tempKeywords也会更新成空的
     // 没有前置的关键词，即head，每轮均会匹配，因为他们加入了headKeywords
-    std::vector<std::shared_ptr<Keyword>> prevKeywords; // 前置关键词
-    std::vector<std::shared_ptr<Keyword>> nextKeywords; // 后置关键词
-    int repeat;                                         // 重复次数（还没用到）
+    std::vector<std::shared_ptr<Keyword>> prevKeywords;  // 前置关键词
+    std::vector<std::shared_ptr<Keyword>> nextKeywords;  // 后置关键词
+    int repeat;  // 重复次数（还没用到）
 };
 
-#endif // KEYWORD_H
+#endif  // KEYWORD_H
