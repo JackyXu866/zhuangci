@@ -184,8 +184,8 @@ int matchKeywords(std::wstring sentence, std::shared_ptr<Database> db) {
 // 因含中文数据，需要转换编码并使用wstring（2字节）存储，与C#的string（2字节）相同
 // argv[1] is the path to the config file
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <config file>" << std::endl;
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " <config file> <csv file>" << std::endl;
         return 1;
     }
 
@@ -194,7 +194,8 @@ int main(int argc, char *argv[]) {
 
     // 读取配置文件，之后需要改成sql
     std::shared_ptr<Database> db = readConfig(argv[1]);
-    readCSV_skill("skill.csv", db);
+    if(argc == 3)
+        readCSV_skill(argv[2], db);
     FilterDB(db);
 
     std::wstring input = L"";
