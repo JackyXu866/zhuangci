@@ -194,8 +194,10 @@ int main(int argc, char *argv[]) {
 
     // 读取配置文件，之后需要改成sql
     std::shared_ptr<Database> db = readConfig(argv[1]);
-    if(argc == 3)
+    if(argc >= 3)
         readCSV_skill(argv[2], db);
+    if (argc >= 4)
+        readCSV_employee(argv[3], db);
     FilterDB(db);
 
     std::wstring input = L"";
@@ -236,4 +238,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
 #endif

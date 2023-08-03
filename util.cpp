@@ -281,81 +281,129 @@ bool matchDate(std::wstring &sentence, struct tm *time) {
     return false;
 }
 
-void readCSV_skill(const char *path, std::shared_ptr<Database> db) {
-    // TODO: windows不支持中文路径，需要在windows环境使用`_wfopen`
-    // FILE* file = _wfopen(L"test.csv", L"rb,ccs=UTF-8");
-    FILE *file = std::fopen(path, "r,ccs=UTF-8");
+std::vector<std::vector<std::wstring>> readLineCell(FILE* file) {
+    std::vector<std::vector<std::wstring>> rt = std::vector<std::vector<std::wstring>>();
+    
+    // 逐字识别
+    wint_t c;
+    bool inCell = false, endLine = false, complete = false;
+    std::wstring sentence = L"";
+    std::vector<std::wstring> tmpVec = std::vector<std::wstring>();
+    while ((c = std::fgetwc(file)) != EOF) {
+        if (feof(file)) break;      // 神奇的eof while不能停住
+        wchar_t ch = (wchar_t)c;
+
+        switch (ch) {
+        case '\"':
+            inCell = !inCell;
+            break;
+        case ',':
+            if (inCell) {
+                sentence += ch;
+                break;
+            }
+            complete = true;
+            break;
+        case '\n':
+            if (!inCell) endLine = true;
+            complete = true;
+            break;
+        default:
+            sentence += ch;
+            break;
+        }
+
+        // 添加完整句子
+        if (complete && sentence == L"" && endLine) return rt;
+        else if(sentence == L"") complete = false;
+        if (!complete) continue;
+
+
+        tmpVec.push_back(sentence);
+        sentence = L"";
+        complete = false;
+
+        if (!inCell) {
+            rt.push_back(tmpVec);
+            tmpVec = std::vector<std::wstring>();
+        }
+        if (endLine) return rt;
+
+    }
+
+    return rt;
+}
+
+void readCSV_skill(const char* path, std::shared_ptr<Database> db) {
+    FILE* file = std::fopen(path, "r,ccs=utf-8");
     if (!file) {
         std::cout << "Error opening file " << path << std::endl;
         return;
     }
 
-    wint_t c;
-    bool multiline = false;  // check open and close \"
-    int numCell = 0;         // number of cell in one line (x/2)
-    std::wstring temp = L"";
-    bool isComplete = false;  // true if one segment is complete
-    std::shared_ptr<Keyword> keyword = nullptr;
-    while ((c = std::fgetwc(file)) != EOF) {
-        if (feof(file)) break;      // 神奇的eof while不能停住
-        wchar_t ch = (wchar_t)c;
-        // std::wcout << ch << std::endl;
-        switch (ch) {
-            case ',':  // end of cell
-                // cell text contains ,
-                if (multiline) {
-                    temp += ch;
-                    break;
-                }
+    std::vector<std::vector<std::wstring>> line;
+    while (true) {
+        line = readLineCell(file);
+        if (line.size() == 0) break;
+        // 技能必须为3个量 [名称，输入，输出]
+        if (line.size() != 3) continue;
 
-                isComplete = true;
-                break;
-            case '\"':  // start or end of multiline
-                // TODO: 文本带有" 会出错 ("""aaa""")
-                multiline = !multiline;
-                isComplete = !multiline;
-                break;
-            case '\n':  // end of line
-                isComplete = true;
+        // 名称
+        std::shared_ptr<Keyword> keyword;
+        std::wstring temp = line[0][0];
+        if (db->keywords.find(temp) != db->keywords.end()) {
+            keyword = db->keywords[temp];
+        } else {
+            keyword =
+                std::shared_ptr<Keyword>(new Keyword(temp, false));
+            db->keywords[temp] = keyword;
+        }
+        keyword->respond = true;
 
-                break;
-            default:  // normal char
-                temp += ch;
-                break;
+        // 输入
+        for (std::wstring tmp : line[1]) {
+            keyword->addSimilarWord(tmp);
         }
 
-        if (temp == L"") isComplete = false;
-        if (!isComplete) continue;
-        // TODO: add to database
-        switch (numCell) {
-            case 0:  // skill name
-                if (db->keywords.find(temp) != db->keywords.end()) {
-                    keyword = db->keywords[temp];
-                }
-                else {
-                    keyword =
-                        std::shared_ptr<Keyword>(new Keyword(temp, false));
-                    db->keywords[temp] = keyword;
-                }
-                keyword->respond = true;
-                // std::wcout << L"读取技能: " << temp << L"\n";
-                break;
-            case 1:  // similar words
-                keyword->addSimilarWord(temp);
-                // std::wcout << L"读取近义词: " << temp << L"\n";
-                break;
-            case 2:  // response
-                keyword->addResponse(temp);
-                // std::wcout << L"读取回复: " << temp << L"\n";
-                break;
-            default:
-                break;
+        // 输出
+        for (std::wstring tmp : line[2]) {
+            keyword->addResponse(tmp);
         }
-        temp = L"";
-        isComplete = false;
-
-        // completed one cell
-        if (!multiline) numCell++;
-        if (!multiline && numCell > 2) numCell = 0;
     }
 }
+void readCSV_employee(const char* path, std::shared_ptr<Database> db) {
+    FILE* file = std::fopen(path, "r,ccs=utf-8");
+    if (!file) {
+        std::cout << "Error opening file " << path << std::endl;
+        return;
+    }
+    std::vector<std::vector<std::wstring>> line;
+    while (true) {
+        line = readLineCell(file);
+        if (line.size() == 0) break;
+        // 员工必须大于5个量 [姓名,性别,工号,所属部门,职位,...]
+        if (line.size() < 5) continue;
+
+        // 姓名
+        std::shared_ptr<Keyword> keyword;
+        std::wstring temp = line[0][0];
+        if (db->keywords.find(temp) != db->keywords.end()) {
+            keyword = db->keywords[temp];
+        } else {
+            keyword =
+                std::shared_ptr<Keyword>(new Keyword(temp, true));
+            db->keywords[temp] = keyword;
+        }
+        keyword->addSimilarWord(line[2][0]);        // 工号
+
+        keyword->respond = true;
+        std::wstring respond = L"";
+        respond = line[0][0] + L"，" + line[1][0] + L"，工号："
+            + line[2][0] + L"，于" + line[3][0] + L"任" + line[4][0] + L"。\n";
+        keyword->addResponse(respond);
+
+        // std::wcout << respond;
+
+    }
+}
+

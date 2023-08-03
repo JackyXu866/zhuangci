@@ -50,5 +50,6 @@ bool matchWeek(std::wstring &sentence, struct tm *time);
 bool matchDate(std::wstring &sentence, struct tm *time);
 
 void readCSV_skill(const char *path, std::shared_ptr<Database> db);
+void readCSV_employee(const char* path, std::shared_ptr<Database> db);
 
 #endif  // UTIL_H
